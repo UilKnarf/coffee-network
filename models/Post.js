@@ -13,6 +13,12 @@ const PostSchema = new mongoose.Schema({
     type: String,
     require: true,
   },
+  category: {
+    type: String,
+  },
+  source:{
+    type: String,
+  },
   caption: {
     type: String,
     required: true,
@@ -21,6 +27,10 @@ const PostSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  likedBy:[{ 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "User"}
+  ],
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",

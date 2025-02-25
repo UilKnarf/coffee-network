@@ -1,15 +1,42 @@
 <%- include('partials/header') -%>
-  <div class="container">
-    <div class="row justify-content-center mt-5">
-      <ul class="row list-unstyled">
-        <% for(var i=0; i<posts.length; i++) {%>
-          <li class="col-6 justify-content-between mt-5">
-            <a href="/post/<%= posts[i]._id%>">
-              <img class="img-fluid" src="<%= posts[i].image%>">
-            </a>
-          </li>
-        <% } %>
-        </ul>
+
+<div class="container">
+  <div class="feed">
+    <div class="feed-header">
+      <% if (user) { %>
+        <h1 class="username">Welcome, <%= user.regularUser ? user.regularUser.userName : user.oauthUser.displayName %>!</h1>
+        <a href="/logout" class="logout">Logout</a>
+      <% } else { %>
+        <h1 class="username">Welcome, Guest!</h1>
+        <p><a href="/login">Login</a> to see posts.</p>
+      <% } %>
     </div>
-  </div>  
+
+    <div class="posts-grid">
+      <% for (var i = 0; i < posts.length; i++) { %>
+        <div class="post-card">
+          <a href="/post/<%= posts[i]._id %>">
+            <img class="img-fluid" src="<%= posts[i].image %>" alt="Post Image">
+          </a>
+          <div class="post-details">
+            <p>
+              <i class="fas fa-heart"></i> <%= posts[i].likes %>
+            </p>
+
+            <p><strong>By:</strong> 
+              <%= posts[i].user ? (posts[i].user.regularUser ? posts[i].user.regularUser.userName : posts[i].user.oauthUser.displayName) : 'Unknown' %>
+            </p>
+
+            <p><strong>Type of Coffee:</strong> <%= posts[i].category || 'No Type of Coffee' %></p>
+
+            <p><strong>Source:</strong> <%= posts[i].source || 'No source' %></p>
+
+            <p><strong>Description:</strong> <%= posts[i].description || 'No description' %></p>
+          </div>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
 <%- include('partials/footer') -%>
