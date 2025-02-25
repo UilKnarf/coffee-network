@@ -147,7 +147,7 @@ exports.postSignup = async (req, res, next) => {
     }
 
     const user = new User({
-      authMethod: "regular"
+      authMethod: "regular",
       regularUser: {
         userName: req.body.userName,
         email: req.body.email,
