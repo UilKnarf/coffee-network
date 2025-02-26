@@ -7,16 +7,23 @@ const regularUserSchema = new mongoose.Schema({
   password: { type: String }
 });
 
+regularUserSchema.methods.comparePassword = async function (candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
+
+regularUserSchema.pre('save', async function(next) {
+  if (this.isModified('password')) {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+  }
+  next();
+});
+
 const oauthUserSchema = new mongoose.Schema({
   googleId: { type: String, unique: true },
   email: { type: String, required: true, lowercase: true },
   displayName: { type: String, required: true },
-  profilePicture: { type: String },
 });
-
-regularUserSchema.methods.comparePassword = async function (candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
-};
 
 const userSchema = new mongoose.Schema({
   authMethod: { 
@@ -25,7 +32,7 @@ const userSchema = new mongoose.Schema({
     required: true
   },
   regularUser: { type: regularUserSchema },
-  oauthUser: { type: oauthUserSchema },
+  oauthUser: { type: oauthUserSchema }
 });
 
 module.exports = mongoose.model('User', userSchema);
