@@ -25,22 +25,14 @@ const oauthUserSchema = new mongoose.Schema({
   displayName: { type: String, required: true },
 });
 
-const userSchema = new Schema({
-  userName: {
+const userSchema = new mongoose.Schema({
+  authMethod: { 
     type: String,
-    required: [true, 'userName is required'],
-    unique: true,  
-    trim: true,    
+    enum: ["regular", "google"],
+    required: true
   },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  }
+  regularUser: { type: regularUserSchema },
+  oauthUser: { type: oauthUserSchema }
 });
 
 module.exports = mongoose.model('User', userSchema);
