@@ -27,31 +27,34 @@ exports.googleAuth = passport.authenticate("google", {
   scope: ["profile", "email"],
 });
 
-exports.googleCallback = passport.authenticate('google', {
-  failureRedirect: '/login',
-}), async (req, res) => {
-  try {
-    const existingUser = await User.findOne({ "oauthUser.googleId": req.user.id });
+exports.googleCallback = [ 
+  passport.authenticate('google', {
+    failureRedirect: '/login',
+  }),
+  async (req, res) => {
+    try {
+      const existingUser = await User.findOne({ "oauthUser.googleId": req.user.id });
 
-    if (existingUser) {
-      return res.redirect("/feed");
-    }
-
-    const newOAuthUser = new User({
-      oauthUser: {
-        googleId: req.user.id,     
-        email: req.user.emails[0].value, 
-        displayName: req.user.displayName, 
+      if (existingUser) {
+        return res.redirect("/feed");
       }
-    });
 
-    await newOAuthUser.save();
+      const newOAuthUser = new User({
+        oauthUser: {
+          googleId: req.user.id,
+          email: req.user.emails[0].value,
+          displayName: req.user.displayName,
+        }
+      });
 
-    res.redirect("/feed");
-  } catch (err) {
-    res.status(500).send("Server error during user creation.");
+      await newOAuthUser.save();
+
+      res.redirect("/feed");
+    } catch (err) {
+      res.status(500).send("Server error during user creation.");
+    }
   }
-};
+];
 
 exports.postLogin = (req, res, next) => {
   const validationErrors = [];
@@ -104,7 +107,6 @@ exports.logout = async (req, res) => {
     res.redirect("/");
   }
 };
-
 exports.getSignup = (req, res) => {
   if (req.user) {
     return res.redirect("/profile");
@@ -117,14 +119,26 @@ exports.getSignup = (req, res) => {
 exports.postSignup = async (req, res, next) => {
   try {
     const validationErrors = [];
-    if (!validator.isEmail(req.body.email))
+
+    req.body.userName = req.body.userName.trim();
+    req.body.email = req.body.email.trim();
+
+    if (!req.body.userName || req.body.userName.trim() === "") {
+      return res.status(400).json({ error: "Username is required" });
+    }   
+
+    if (!req.body.email || !validator.isEmail(req.body.email)) {
       validationErrors.push({ msg: "Please enter a valid email address." });
-    if (!validator.isLength(req.body.password, { min: 8 }))
+    }
+
+    if (!validator.isLength(req.body.password, { min: 8 })) {
       validationErrors.push({
         msg: "Password must be at least 8 characters long",
       });
-    if (req.body.password !== req.body.confirmPassword)
+    }
+    if (req.body.password !== req.body.confirmPassword) {
       validationErrors.push({ msg: "Passwords do not match" });
+    }
 
     if (validationErrors.length) {
       req.flash("errors", validationErrors);
@@ -136,7 +150,10 @@ exports.postSignup = async (req, res, next) => {
     });
 
     const existingUser = await User.findOne({
-      $or: [{ email: req.body.email }, { userName: req.body.userName }],
+      $or: [
+        { email: req.body.email }, 
+        { "regularUser.userName": req.body.userName }, 
+      ],
     });
 
     if (existingUser) {
@@ -154,7 +171,8 @@ exports.postSignup = async (req, res, next) => {
         password: req.body.password,
       },
     });
-    
+
+    // Save the user
     await user.save();
 
     req.logIn(user, (err) => {
@@ -165,7 +183,7 @@ exports.postSignup = async (req, res, next) => {
     });
   } catch (err) {
     console.error("Error in postSignup:", err);
-    next(err);
+    req.flash("errors", { msg: "An error occurred during signup. Please try again." });
+    res.redirect("../signup");
   }
 };
-

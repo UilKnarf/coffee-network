@@ -1,13 +1,14 @@
+const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const mongoose = require("mongoose");
 const User = require("../models/User");
-const passport = require("passport");
-const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const dotenv = require("dotenv");
 
 dotenv.config();
 
 module.exports = function (passport) {
+  // Local Strategy
   passport.use(
     new LocalStrategy({ usernameField: "email" }, async (email, password, done) => {
       try {
@@ -43,33 +44,7 @@ module.exports = function (passport) {
     })
   );
 
-  passport.serializeUser((user, done) => {
-    if (user.regularUser) {
-      done(null, user.regularUser._id); 
-    } else if (user.oauthUser) {
-      done(null, user.oauthUser.googleId);
-    }
-  });
-
-  passport.deserializeUser(async (id, done) => {
-    try {
-      const user = await User.findOne({
-        $or: [
-          { "regularUser._id": id },
-          { "oauthUser.googleId": id }
-        ]
-      });
-
-      if (user) {
-        done(null, user);
-      } else {
-        done(null, false);
-      }
-    } catch (err) {
-      done(err, null);
-    }
-  });
-
+  // Google Strategy
   passport.use(
     new GoogleStrategy(
       {
@@ -97,4 +72,33 @@ module.exports = function (passport) {
       }
     )
   );
+
+  // Serialize User
+  passport.serializeUser((user, done) => {
+    if (user.regularUser) {
+      done(null, user.regularUser._id); 
+    } else if (user.oauthUser) {
+      done(null, user.oauthUser.googleId);
+    }
+  });
+
+  // Deserialize User
+  passport.deserializeUser(async (id, done) => {
+    try {
+      const user = await User.findOne({
+        $or: [
+          { "regularUser._id": id },
+          { "oauthUser.googleId": id }
+        ]
+      });
+
+      if (user) {
+        done(null, user);
+      } else {
+        done(null, false);
+      }
+    } catch (err) {
+      done(err, null);
+    }
+  });
 };
