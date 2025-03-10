@@ -27,10 +27,10 @@
               <%= posts[i].user ? (posts[i].user.regularUser ? posts[i].user.regularUser.userName : posts[i].user.oauthUser.displayName) : 'Unknown' %>
             </p>
 
-            <p><strong>Type of Coffee:</strong> <%= posts[i].category || 'No Type of Coffee' %></p>
-
-            <p><strong>Source:</strong> <%= posts[i].source || 'No source' %></p>
-
+            <p><strong>Title:</strong> <%= posts[i].Title || 'No Title' %></p>
+            
+            <p><strong>Coffee Origin:</strong> <%= posts[i].category || 'No Coffee Origin' %></p>
+            
             <p><strong>Description:</strong> <%= posts[i].description || 'No description' %></p>
           </div>
         </div>

@@ -15,25 +15,15 @@
             <label for="title" class="form-label">Title</label>
             <input type="text" class="form-control" id="title" name="title">
           </div>
-          
-          <div class="mb-3">
-            <label for="caption" class="form-label">Caption</label>
-            <textarea class="form-control" id="caption" name="caption"></textarea>
-          </div>
-          
+                   
           <div class="mb-3">
             <label for="description" class="form-label">Description</label>
             <textarea class="form-control" id="description" name="description"></textarea>
           </div>
           
           <div class="mb-3">
-            <label for="category" class="form-label">Type of Coffee</label>
+            <label for="category" class="form-label">Coffee Origin</label>
             <input type="text" class="form-control" id="category" name="category">
-          </div>
-
-          <div class="mb-3">
-            <label for="source" class="form-label">Source</label>
-            <input type="text" class="form-control" id="source" name="source">
           </div>
 
           <input type="hidden" name="author" value="<%= user.regularUser ? user.regularUser.userName : user.oauthUser.displayName %>">
