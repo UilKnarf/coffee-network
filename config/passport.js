@@ -8,7 +8,6 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 module.exports = function (passport) {
-  // Local Strategy
   passport.use(
     new LocalStrategy({ usernameField: "email" }, async (email, password, done) => {
       try {
@@ -44,7 +43,6 @@ module.exports = function (passport) {
     })
   );
 
-  // Google Strategy
   passport.use(
     new GoogleStrategy(
       {
@@ -54,12 +52,15 @@ module.exports = function (passport) {
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
-          let user = await User.findOne({ googleId: profile.id });
+          let user = await User.findOne({ "oauthUser.googleId": profile.id });
           if (!user) {
             user = new User({
-              googleId: profile.id,
-              email: profile.emails[0].value,
-              displayName: profile.displayName,
+              authMethod: 'google',
+              oauthUser: {
+                googleId: profile.id,
+                email: profile.emails[0].value,
+                displayName: profile.displayName,
+              }
             });
             await user.save(); 
           }
@@ -73,25 +74,25 @@ module.exports = function (passport) {
     )
   );
 
-  // Serialize User
   passport.serializeUser((user, done) => {
     if (user.regularUser) {
-      done(null, user.regularUser._id); 
+      done(null, user.regularUser._id);
     } else if (user.oauthUser) {
       done(null, user.oauthUser.googleId);
     }
   });
 
-  // Deserialize User
   passport.deserializeUser(async (id, done) => {
     try {
-      const user = await User.findOne({
-        $or: [
-          { "regularUser._id": id },
-          { "oauthUser.googleId": id }
-        ]
-      });
+      let user;
+      if (mongoose.Types.ObjectId.isValid(id)) {
+        user = await User.findOne({ "regularUser._id": id });
+      }
 
+      if (!user) {
+        user = await User.findOne({ "oauthUser.googleId": id });
+      }
+  
       if (user) {
         done(null, user);
       } else {
@@ -101,4 +102,4 @@ module.exports = function (passport) {
       done(err, null);
     }
   });
-};
+}

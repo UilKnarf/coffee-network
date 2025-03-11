@@ -17,6 +17,7 @@ const coffeeRoutes = require("./public/js/maps");
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const sessionSecret = process.env.SESSION_SECRET;
 const authRoutes = require('./routes/authroutes'); 
+const registerRoutes = require('./routes/register')
 
 require("dotenv").config();
 
@@ -52,9 +53,10 @@ app.use(flash());
 app.use("/", mainRoutes);
 app.use("/post", postRoutes);
 app.use("/comment", commentRoutes);
-app.use("/discover", discoverRoutes)
+app.use("/discover", discoverRoutes);
 
 app.use(authRoutes);
+app.use('/register', registerRoutes);
 
 app.get('/feed', (req, res) => {
   if (!req.isAuthenticated()) {

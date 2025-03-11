@@ -56,6 +56,31 @@ exports.googleCallback = [
   }
 ];
 
+exports.register = async (req, res) => {
+  try {
+    const { userName, email, password } = req.body;
+
+    if (!userName || !email || !password) {
+      return res.status(400).send("Username, email, and password are required.");
+    }
+
+    const newUser = new User({
+      authMethod: "regular",
+      regularUser: {
+        userName: userName,
+        email: email,
+        password: password,
+      },
+    });
+
+    await newUser.save();
+    res.send("User registered successfully.");
+  } catch (err) {
+    console.error("Registration error:", err);
+    res.status(500).send("Registration failed.");
+  }
+};
+
 exports.postLogin = (req, res, next) => {
   const validationErrors = [];
   if (!validator.isEmail(req.body.email))
