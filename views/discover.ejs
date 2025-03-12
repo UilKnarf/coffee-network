@@ -1,0 +1,37 @@
+<%- include('partials/header') -%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discover Coffee Shops</title>
+  <link rel="stylesheet" href="/css/style.css"> 
+</head>
+<body>
+
+  <div class="search-container">
+    <input type="text" id="search-input" placeholder="Search for coffee shops..." />
+    <button onclick="searchCoffeeShops()">Search</button>
+  </div>
+
+  <div id="map" style="width: 100%; height: 500px; margin-top: 20px;"></div>
+
+  <div id="results">
+    <ul id="coffee-list">
+      <% coffeeShops.forEach(shop => { %>
+        <div class="coffee-item">
+          <h2><%= shop.name %></h2>
+          <p><strong>Address:</strong> <%= shop.vicinity %></p>
+          <p><strong>Rating:</strong> <%= shop.rating || 'No rating' %> stars</p>
+          <a href="https://www.google.com/maps/search/?api=1&query=<%= shop.geometry.location.lat %>,<%= shop.geometry.location.lng %>" target="_blank">View on Google Maps</a>
+        </div>
+      <% });%>
+    </ul> 
+  </div>
+
+  <script src="https://maps.googleapis.com/maps/api/js?key=<Your-API-Key>-zxcFac&libraries=places&callback=initMap" async defer></script>
+  <script src="/js/maps.js"></script>
+
+</body>
+</html>
+<%- include('partials/footer') -%>
